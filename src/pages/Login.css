@@ -1,0 +1,135 @@
+.login-container {
+  display: flex;
+  height: 100vh;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Left Side */
+.login-image {
+  flex: 1;
+  background: url("/src/assets/img/bg3.jpg") center/cover no-repeat;
+  color: white;
+  display: flex;
+  align-items: flex-end;
+  padding: 50px;
+  position: relative;
+}
+
+.login-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 38, 77, 0.6);
+}
+
+.login-text {
+  position: relative;
+  z-index: 1;
+}
+
+.login-text h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.login-text p {
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+/* Right Side */
+.login-form-container {
+  flex: 1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 380px;
+  text-align: left;
+}
+
+.form-box h3 {
+  font-weight: 700;
+  color: #003366;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #007bff;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+}
+
+.form-options a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.btn-login {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-login:hover {
+  background: #0056b3;
+}
+
+.back-home {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.back-home a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-home a:hover {
+  text-decoration: underline;
+}
