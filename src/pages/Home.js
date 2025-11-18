@@ -52,6 +52,9 @@ function Home() {
                       <Link to="/beneficiaries">Beneficiaries</Link>
                   </ul>
                 </li>
+                <li>
+                  <a href="/technical-assistance">Technical Assistance</a>
+                </li>
 
                 <li>
                   <a href="#projects">Projects</a>
