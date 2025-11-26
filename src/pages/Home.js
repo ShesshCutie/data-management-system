@@ -52,11 +52,11 @@ function Home() {
                       <Link to="/beneficiaries">Beneficiaries</Link>
                   </ul>
                 </li>
-                <li>
+                {/* <li>
                   <a href="/technical-assistance">Technical Assistance</a>
-                </li>
+                </li> */}
 
-                <li>
+                {/* <li>
                   <a href="#projects">Projects</a>
                 </li>
                 <li>
@@ -82,7 +82,7 @@ function Home() {
                       <a href="#custom">Custom Reports</a>
                     </li>
                   </ul>
-                </li>
+                </li> */}
 
                 <li className="dropdown">
                   <a href="#">
