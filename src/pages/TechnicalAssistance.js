@@ -1,92 +1,195 @@
-// Updated Technical Assistance Dashboard Component
-import React, { useState } from "react";
-import { Search, Bell, User } from "lucide-react";
-import dashboardImg from "/mnt/data/820f9f98-60a1-4ce9-8ab5-e95495b83158.png";
+import React, { useState, useMemo } from "react";
 import TA_2025 from "../data/TA_2025.json";
+import {
+  IconSearch,
+  IconChevronLeft,
+  IconChevronRight
+} from "@tabler/icons-react";
 
 export default function TechnicalAssistanceDashboard() {
   const [search, setSearch] = useState("");
-  const filtered = TA_2025.filter((item) =>
-    item.remarks.toLowerCase().includes(search.toLowerCase())
+  const [sortField, setSortField] = useState("date");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+
+  // MAPPING FOR BOTH JSON FORMATS
+  const mappedData = useMemo(
+    () =>
+      TA_2025.map((item) => {
+        if (item.client) {
+          return {
+            date: item.month || "",
+            client: item.client || "",
+            remarks: item.remarks || "",
+            status: item.status || "Completed",
+          };
+        }
+        return {
+          date: item["Unnamed: 2"] || "",
+          client: `${item["Unnamed: 5"] || ""} ${item["Unnamed: 6"] || ""}`.trim(),
+          remarks: item["Unnamed: 25"] || "",
+          status: "Completed",
+        };
+      }),
+    []
   );
 
+  const filtered = mappedData.filter((row) =>
+    (row.remarks || "").toLowerCase().includes(search.toLowerCase())
+  );
+  const monthOrder = {
+  JANUARY: 1,
+  FEBRUARY: 2,
+  MARCH: 3,
+  APRIL: 4,
+  MAY: 5,
+  JUNE: 6,
+  JULY: 7,
+  AUGUST: 8,
+  SEPTEMBER: 9,
+  OCTOBER: 10,
+  NOVEMBER: 11,
+  DECEMBER: 12
+};
+
+
+ const sorted = [...filtered].sort((a, b) => {
+  const A = a[sortField] || "";
+  const B = b[sortField] || "";
+
+  // SPECIAL SORT FOR MONTHS
+  if (sortField === "date") {
+    const monthA = monthOrder[A.toUpperCase()] || 0;
+    const monthB = monthOrder[B.toUpperCase()] || 0;
+
+    return sortOrder === "asc" ? monthA - monthB : monthB - monthA;
+  }
+
+  // NORMAL TEXT SORT
+  return sortOrder === "asc"
+    ? A.localeCompare(B)
+    : B.localeCompare(A);
+});
+
+
+  const start = (page - 1) * rowsPerPage;
+  const paginated = sorted.slice(start, start + rowsPerPage);
+  const totalPages = Math.ceil(sorted.length / rowsPerPage);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col p-6">
-      {/* HEADER */}
-      <div className="w-full flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <button className="px-4 py-2 border rounded-lg">Upgrade to PRO</button>
-      </div>
+    <div className="container-xl mt-4">
 
-      {/* BREADCRUMBS + SEARCH + ICONS */}
-      <div className="w-full flex items-center justify-between bg-white p-4 rounded-xl shadow-sm mb-4">
-        <span className="text-gray-600">Home / <strong>Technical Assistance</strong></span>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center border px-3 py-2 rounded-lg bg-gray-100">
-            <Search className="w-4 h-4 text-gray-500 mr-2" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-transparent outline-none"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      {/* PAGE TITLE */}
+      <div className="page-header d-print-none mb-4">
+        <div className="row align-items-center justify-content-center">
+          <div className="col-auto">
+            <h2 className="page-title text-center">Technical Assistance Records</h2>
           </div>
-
-          <button className="p-2 border rounded-lg bg-gray-100"><Bell /></button>
-          <button className="p-2 border rounded-lg bg-gray-100"><User /></button>
         </div>
       </div>
 
-      {/* DASHBOARD IMAGE */}
-      <div className="w-full bg-white p-4 rounded-xl shadow-sm mb-6">
-        <img src={dashboardImg} alt="dashboard preview" className="w-full rounded-lg" />
-      </div>
+      {/* SEARCH + SORT CARD */}
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="row g-3">
+            <div className="col-md-4">
+              <div className="input-icon">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search assistance type..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <span className="input-icon-addon">
+                  <IconSearch size={18} />
+                </span>
+              </div>
+            </div>
 
-      {/* STATS ROW */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold">Bookings</h2>
-          <p className="text-2xl font-bold">281</p>
-          <span className="text-green-600">+55% than last week</span>
-        </div>
+            <div className="col-md-3">
+              <select
+                className="form-select"
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value)}
+              >
+                <option value="date">Sort by Date</option>
+                <option value="client">Sort by Client</option>
+                <option value="remarks">Sort by Assistance Type</option>
+              </select>
+            </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold">Today's Users</h2>
-          <p className="text-2xl font-bold">2,300</p>
-          <span className="text-green-600">+3% than last month</span>
-        </div>
+            <div className="col-md-2">
+              <select
+                className="form-select"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
 
-        <div className="bg-white p-5 rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold">Total Requests</h2>
-          <p className="text-2xl font-bold">{TA_2025.length}</p>
+            <div className="col-md-3 text-end">
+              <div className="card px-3 py-2 d-inline-block shadow-sm">
+                <div className="text-muted small">Total Requests</div>
+                <div className="fw-bold fs-4">{mappedData.length}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Technical Assistance Records</h2>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-2">Date</th>
-              <th className="p-2">Client</th>
-              <th className="p-2">Concern</th>
-              <th className="p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row, i) => (
-              <tr key={i} className="border-b hover:bg-gray-50">
-                <td className="p-2">{row.date}</td>
-                <td className="p-2">{row.client}</td>
-                <td className="p-2">{row.remarks}</td>
-                <td className="p-2">{row.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="card">
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table className="table table-vcenter card-table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Assistance Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((row, i) => (
+                  <tr key={i}>
+                    <td>{row.date}</td>
+                    <td>{row.client}</td>
+                    <td>{row.remarks}</td>
+                    <td>
+                      <span className="badge bg-light text-black">
+                        {row.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* PAGINATION */}
+        <div className="card-footer d-flex justify-content-between align-items-center">
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            <IconChevronLeft size={18} /> Prev
+          </button>
+
+          <span>Page {page} of {totalPages}</span>
+
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next <IconChevronRight size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
