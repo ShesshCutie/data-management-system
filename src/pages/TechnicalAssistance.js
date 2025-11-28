@@ -1,5 +1,10 @@
 import React, { useState, useMemo } from "react";
-import TA_2025 from "../data/TA_2025.json";
+
+// IMPORT JSON FILES PER YEAR
+import TA_2023 from "../data/2023/TA_2023.json";
+import TA_2024 from "../data/2024/TA_2024.json";
+import TA_2025 from "../data/2025/TA_2025.json";
+
 import {
   IconSearch,
   IconChevronLeft,
@@ -7,72 +12,110 @@ import {
 } from "@tabler/icons-react";
 
 export default function TechnicalAssistanceDashboard() {
+  const [selectedYear, setSelectedYear] = useState("2025");
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState("date");
   const [sortOrder, setSortOrder] = useState("asc");
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
-  // MAPPING FOR BOTH JSON FORMATS
-  const mappedData = useMemo(
-    () =>
-      TA_2025.map((item) => {
-        if (item.client) {
-          return {
-            date: item.month || "",
-            client: item.client || "",
-            remarks: item.remarks || "",
-            status: item.status || "Completed",
-          };
-        }
-        return {
-          date: item["Unnamed: 2"] || "",
-          client: `${item["Unnamed: 5"] || ""} ${item["Unnamed: 6"] || ""}`.trim(),
-          remarks: item["Unnamed: 25"] || "",
-          status: "Completed",
-        };
-      }),
-    []
-  );
+  // MAP YEARS TO JSON FILES
+  const yearDataMap = {
+    "2023": TA_2023,
+    "2024": TA_2024,
+    "2025": TA_2025
+  };
 
+  // LOAD DATA FOR SELECTED YEAR
+  const rawData = yearDataMap[selectedYear] || [];
+
+  // =============================
+  //  AUTO MAPPER IMPLEMENTATION
+  // =============================
+  const mappedData = useMemo(() => {
+    return rawData.map((item) => {
+      // Lowercase key version for easier lookup
+      const lowerKeys = Object.fromEntries(
+        Object.entries(item).map(([k, v]) => [k.toLowerCase().trim(), v])
+      );
+
+      // ---- AUTO-DETECT DATE FIELD ----
+      const date =
+        lowerKeys["month"] ||
+        lowerKeys["month "] ||
+        lowerKeys["date"] ||
+        lowerKeys["day"] ||
+        lowerKeys["unnamed: 2"] ||
+        "";
+
+      // ---- AUTO-DETECT CLIENT NAME ----
+      const firstName =
+        lowerKeys["first name"] ||
+        lowerKeys["firstname"] ||
+        lowerKeys["unnamed: 5"] ||
+        lowerKeys["client"] ||
+        "";
+
+      const lastName =
+        lowerKeys["last name"] ||
+        lowerKeys["lastname"] ||
+        lowerKeys["unnamed: 6"] ||
+        "";
+
+      const client =
+        lowerKeys["client"] ||
+        `${firstName} ${lastName}`.trim();
+
+      // ---- AUTO-DETECT ASSISTANCE TYPE ----
+      const remarks =
+        lowerKeys["remarks"] ||
+        lowerKeys["assistance type"] ||
+        lowerKeys["type of goods and services provided"] ||
+        lowerKeys["unnamed: 25"] ||
+        "";
+
+      // ---- AUTO-DETECT STATUS ----
+      const status =
+        lowerKeys["status"] ||
+        "Completed";
+
+      return {
+        date,
+        client,
+        remarks,
+        status
+      };
+    });
+  }, [rawData]);
+
+  // SEARCH FILTER
   const filtered = mappedData.filter((row) =>
     (row.remarks || "").toLowerCase().includes(search.toLowerCase())
   );
+
+  // MONTH SORTING MAP
   const monthOrder = {
-  JANUARY: 1,
-  FEBRUARY: 2,
-  MARCH: 3,
-  APRIL: 4,
-  MAY: 5,
-  JUNE: 6,
-  JULY: 7,
-  AUGUST: 8,
-  SEPTEMBER: 9,
-  OCTOBER: 10,
-  NOVEMBER: 11,
-  DECEMBER: 12
-};
+    JANUARY: 1, FEBRUARY: 2, MARCH: 3,
+    APRIL: 4, MAY: 5, JUNE: 6,
+    JULY: 7, AUGUST: 8, SEPTEMBER: 9,
+    OCTOBER: 10, NOVEMBER: 11, DECEMBER: 12
+  };
 
+  // SORTING
+  const sorted = [...filtered].sort((a, b) => {
+    const A = a[sortField] || "";
+    const B = b[sortField] || "";
 
- const sorted = [...filtered].sort((a, b) => {
-  const A = a[sortField] || "";
-  const B = b[sortField] || "";
+    if (sortField === "date") {
+      const monthA = monthOrder[A.toUpperCase()] || 0;
+      const monthB = monthOrder[B.toUpperCase()] || 0;
+      return sortOrder === "asc" ? monthA - monthB : monthB - monthA;
+    }
 
-  // SPECIAL SORT FOR MONTHS
-  if (sortField === "date") {
-    const monthA = monthOrder[A.toUpperCase()] || 0;
-    const monthB = monthOrder[B.toUpperCase()] || 0;
+    return sortOrder === "asc" ? A.localeCompare(B) : B.localeCompare(A);
+  });
 
-    return sortOrder === "asc" ? monthA - monthB : monthB - monthA;
-  }
-
-  // NORMAL TEXT SORT
-  return sortOrder === "asc"
-    ? A.localeCompare(B)
-    : B.localeCompare(A);
-});
-
-
+  // PAGINATION
   const start = (page - 1) * rowsPerPage;
   const paginated = sorted.slice(start, start + rowsPerPage);
   const totalPages = Math.ceil(sorted.length / rowsPerPage);
@@ -93,6 +136,8 @@ export default function TechnicalAssistanceDashboard() {
       <div className="card mb-4">
         <div className="card-body">
           <div className="row g-3">
+
+            {/* SEARCH BAR */}
             <div className="col-md-4">
               <div className="input-icon">
                 <input
@@ -108,6 +153,23 @@ export default function TechnicalAssistanceDashboard() {
               </div>
             </div>
 
+            {/* YEAR FILTER */}
+            <div className="col-md-2">
+              <select
+                className="form-select"
+                value={selectedYear}
+                onChange={(e) => {
+                  setSelectedYear(e.target.value);
+                  setPage(1); // reset pagination
+                }}
+              >
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+              </select>
+            </div>
+
+            {/* SORT FIELD */}
             <div className="col-md-3">
               <select
                 className="form-select"
@@ -120,6 +182,7 @@ export default function TechnicalAssistanceDashboard() {
               </select>
             </div>
 
+            {/* SORT ORDER */}
             <div className="col-md-2">
               <select
                 className="form-select"
@@ -131,12 +194,14 @@ export default function TechnicalAssistanceDashboard() {
               </select>
             </div>
 
+            {/* TOTAL COUNT CARD */}
             <div className="col-md-3 text-end">
               <div className="card px-3 py-2 d-inline-block shadow-sm">
                 <div className="text-muted small">Total Requests</div>
                 <div className="fw-bold fs-4">{mappedData.length}</div>
               </div>
             </div>
+
           </div>
         </div>
       </div>

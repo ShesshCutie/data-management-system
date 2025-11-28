@@ -7,7 +7,6 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Beneficiaries from "./pages/Beneficiaries";
 import TechnicalAssistance from "./pages/TechnicalAssistance";
 
 
@@ -35,7 +34,6 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/home" element={<Home />} />
-      <Route path="/beneficiaries" element={<Beneficiaries />} />
       <Route path="/technical-assistance" element={<TechnicalAssistance />} />
     </Routes>
   );
